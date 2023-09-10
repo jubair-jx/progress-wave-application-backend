@@ -54,6 +54,9 @@ async function run() {
     const userCollection = client.db("wave-db").collection("users");
     //boardCollection
     const boardCollection = client.db("wave-db").collection("boards");
+    //ListCollection
+    const listCollection = client.db("wave-db").collection("lists");
+
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
@@ -83,6 +86,37 @@ async function run() {
           .send({ message: "Your Boards Data isn't Found.." });
       }
       const result = await boardCollection.insertOne(body);
+      res.send(result);
+    });
+    app.post("/lists", async (req, res) => {
+      const body = req.body;
+      //body valided
+      if (!body) {
+        return res
+          .status(404)
+          .send({ message: "Your lists Data isn't Found.." });
+      }
+      const result = await listCollection.insertOne(body);
+      res.send(result);
+    });
+    app.get("/lists/:email", async (req, res) => {
+      const body = req.params.email;
+
+      const result = await listCollection.find({ userMail: body }).toArray();
+
+      res.send(result);
+    });
+    app.get("/boards/:email", async (req, res) => {
+      const body = req.params.email;
+
+      const result = await boardCollection.find({ userMail: body }).toArray();
+
+      res.send(result);
+    });
+    app.delete("/boards/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await boardCollection.deleteOne(query);
       res.send(result);
     });
 
